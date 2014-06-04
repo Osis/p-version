@@ -16,12 +16,17 @@ BANNER
   opts.on('--product-dir PATH', 'The path to the root of the product directory') do |product_dir|
     options[:product_dir] = product_dir
   end
+
+  opts.on('--to-version VERSION', 'Version you want to set your product to.') do |to_version|
+    options[:to_version] = to_version
+  end
 end.parse!
 
 product_dir = options.fetch(:product_dir)
+to_version = options[:to_version]
 
-binaries_yaml = PVersion::BinariesYaml.build(product_dir)
-migrations_yaml = PVersion::MigrationsYaml.build(product_dir)
+binaries_yaml = PVersion::BinariesYaml.build(product_dir, to_version)
+migrations_yaml = PVersion::MigrationsYaml.build(product_dir, to_version)
 puts "incrementing version from #{binaries_yaml.old_version} to #{binaries_yaml.new_version}"
 
 binaries_yaml.bump_version_and_save

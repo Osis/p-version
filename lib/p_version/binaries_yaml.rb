@@ -2,15 +2,16 @@ require 'yaml'
 
 module PVersion
   class BinariesYaml
-    def self.build(root_path)
+    def self.build(root_path, to_version=nil)
       binaries_yaml_path = File.expand_path(File.join(root_path, 'metadata_parts', 'binaries.yml'))
       binaries_yaml = YAML.load_file(binaries_yaml_path)
-      new(binaries_yaml, binaries_yaml_path)
+      new(binaries_yaml, binaries_yaml_path, to_version)
     end
 
-    def initialize(binaries_hash, binaries_yaml_path)
+    def initialize(binaries_hash, binaries_yaml_path, to_version=nil)
       @binaries_hash = binaries_hash
       @binaries_yaml_path = binaries_yaml_path
+      @to_version = to_version
     end
 
     def old_version
@@ -19,7 +20,7 @@ module PVersion
 
     def new_version
       number = old_version.match(/([0-9]+)$/)[-1]
-      next_number = number.to_i + 1
+      next_number = @to_version || (number.to_i + 1)
       old_version.gsub(/[0-9]+$/, next_number.to_s)
     end
 

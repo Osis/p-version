@@ -4,6 +4,7 @@ require 'tmpdir'
 
 describe PVersion::MigrationsYaml do
   let(:root_path) { Dir.mktmpdir }
+  let(:to_version) { 99 }
 
   before do
     FileUtils.cp_r(Dir.glob(File.join(assets_path, 'fake-root', '*')), root_path)
@@ -14,8 +15,8 @@ describe PVersion::MigrationsYaml do
   let(:migrations_yaml_file_path_bumped) { File.join(root_path, 'bumped', 'migration.yml') }
 
   describe '.build' do
-
     let(:migrations_yaml) { PVersion::MigrationsYaml.build(root_path) }
+
     it 'initializes a MigrationsYaml object using a file' do
       expect(migrations_yaml.old_version).to eq('1.2.3.4-alpha32')
     end
@@ -37,6 +38,7 @@ describe PVersion::MigrationsYaml do
   end
 
   subject(:migrations_yaml) { described_class.new(migrations_yaml_hash, migrations_yaml_file_path) }
+  subject(:migrations_yaml_specified) { described_class.new(migrations_yaml_hash, migrations_yaml_file_path, to_version) }
   let(:migrations_yaml_hash) do
     {
       'product'                   => 'example-product',
@@ -77,15 +79,31 @@ describe PVersion::MigrationsYaml do
     }
   end
 
-  describe '#old_version' do
-    it 'returns the string of the product version, before incrementing' do
-      expect(migrations_yaml.old_version).to eq('1.2.3.4-alpha32')
+  context 'auto-increment' do
+    describe '#old_version' do
+      it 'returns the string of the product version, before incrementing' do
+        expect(migrations_yaml.old_version).to eq('1.2.3.4-alpha32')
+      end
+    end
+
+    describe '#new_version' do
+      it 'returns the string of the product version, after incrementing' do
+        expect(migrations_yaml.new_version).to eq('1.2.3.4-alpha33')
+      end
     end
   end
 
-  describe '#new_version' do
-    it 'returns the string of the product version, after incrementing' do
-      expect(migrations_yaml.new_version).to eq('1.2.3.4-alpha33')
+  context 'specified' do
+    describe '#old_version' do
+      it 'returns the string of the product version, before incrementing' do
+        expect(migrations_yaml_specified.old_version).to eq('1.2.3.4-alpha32')
+      end
+    end
+
+    describe '#new_version' do
+      it 'returns the string of the product version, after incrementing' do
+        expect(migrations_yaml_specified.new_version).to eq('1.2.3.4-alpha99')
+      end
     end
   end
 

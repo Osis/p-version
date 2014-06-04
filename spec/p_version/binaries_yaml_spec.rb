@@ -4,6 +4,7 @@ require 'tmpdir'
 
 describe PVersion::BinariesYaml do
   let(:root_path) { Dir.mktmpdir }
+  let(:to_version) { 99 }
 
   before do
     FileUtils.cp_r(Dir.glob(File.join(assets_path, 'fake-root', '*')), root_path)
@@ -15,12 +16,15 @@ describe PVersion::BinariesYaml do
 
   describe '.build' do
     let(:binaries_yaml) { PVersion::BinariesYaml.build(root_path) }
+    let(:to_version) { 99 }
+
     it 'initializes a BinariesYaml object using a file' do
       expect(binaries_yaml.old_version).to eq('1.2.3.4-alpha32')
     end
   end
 
   subject(:binaries_yaml) { described_class.new(binaries_yaml_hash, binaries_yaml_file_path) }
+  subject(:binaries_yaml_specified) { described_class.new(binaries_yaml_hash, binaries_yaml_file_path, to_version) }
   let(:binaries_yaml_hash) do
     {
       'name'                      => 'example-product',
@@ -49,15 +53,31 @@ describe PVersion::BinariesYaml do
     }
   end
 
-  describe '#old_version' do
-    it 'returns the string of the product version, before incrementing' do
-      expect(binaries_yaml.old_version).to eq('1.2.3.4-alpha32')
+  context 'auto-increment' do
+    describe '#old_version' do
+      it 'returns the string of the product version, before incrementing' do
+        expect(binaries_yaml.old_version).to eq('1.2.3.4-alpha32')
+      end
+    end
+
+    describe '#new_version' do
+      it 'returns the string of the product version, after incrementing' do
+        expect(binaries_yaml.new_version).to eq('1.2.3.4-alpha33')
+      end
     end
   end
 
-  describe '#new_version' do
-    it 'returns the string of the product version, after incrementing' do
-      expect(binaries_yaml.new_version).to eq('1.2.3.4-alpha33')
+  context 'specified' do
+    describe '#old_version' do
+      it 'returns the string of the product version, before incrementing' do
+        expect(binaries_yaml_specified.old_version).to eq('1.2.3.4-alpha32')
+      end
+    end
+
+    describe '#new_version' do
+      it 'returns the string of the product version, after incrementing' do
+        expect(binaries_yaml_specified.new_version).to eq('1.2.3.4-alpha99')
+      end
     end
   end
 

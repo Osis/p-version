@@ -2,18 +2,19 @@ require 'yaml'
 
 module PVersion
   class MigrationsYaml
-    def self.build(root_path)
+    def self.build(root_path, to_version=nil)
       migration_file_paths = Dir.glob(File.expand_path(File.join(root_path, 'content_migrations', '*.yml')))
       fail "I can't figure out which content_migrations YAML file to use!" unless migration_file_paths.size == 1
 
       migrations_yaml_path = migration_file_paths.first
       migrations_yaml = YAML.load_file(migrations_yaml_path)
-      new(migrations_yaml, migrations_yaml_path)
+      new(migrations_yaml, migrations_yaml_path, to_version)
     end
 
-    def initialize(migrations_hash, migrations_yaml_path)
+    def initialize(migrations_hash, migrations_yaml_path, to_version=nil)
       @migrations_hash = migrations_hash
       @migrations_yaml_path = migrations_yaml_path
+      @to_version = to_version
     end
 
     def old_version
@@ -22,7 +23,7 @@ module PVersion
 
     def new_version
       number = old_version.match(/([0-9]+)$/)[-1]
-      next_number = number.to_i + 1
+      next_number = @to_version || (number.to_i + 1)
       old_version.gsub(/[0-9]+$/, next_number.to_s)
     end
 
