@@ -23,7 +23,7 @@ BANNER
 end.parse!
 
 product_dir = options.fetch(:product_dir)
-to_version = options[:to_version]
+to_version = options.fetch(:to_version, nil)
 
 binaries_yaml = PVersion::BinariesYaml.build(product_dir, to_version)
 migrations_yaml = PVersion::MigrationsYaml.build(product_dir, to_version)
